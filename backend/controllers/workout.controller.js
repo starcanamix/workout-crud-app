@@ -3,7 +3,8 @@ import Workout from "../models/workout.model.js"
 
 export const getAllWorkouts = async (req, res) => {
     try {
-        const workouts = await Workout.find({}).sort({createdAt: -1});
+        const user_id = req.user;
+        const workouts = await Workout.find({user_id}).sort({createdAt: -1});
         if(!workouts)
             return res.status(400).json({error: "No workouts were found!"});
 
@@ -27,9 +28,10 @@ export const createWorkout = async (req, res) => {
     if(emptyFields.length > 0) return res.status(400).json({error: "Please fill in all the fields!", emptyFields});
 
     try {
-        const newWorkout = await Workout.create(workout);
-        if(!workout)
-            return res.status(400).json({error: "Workout couldn't be created!"});
+        const user_id = req.user;
+        const newWorkout = await Workout.create({...workout, user_id});
+        if(!newWorkout)
+            return res.status(400).json({error: "Workout couldn't be created!"}); 
 
         res.status(200).json({data: newWorkout});
     }

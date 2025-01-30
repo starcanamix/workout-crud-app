@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import useWorkoutContext from '../hooks/useWorkoutContext.js';
+import useAuthContext from '../hooks/useAuthContext.js';
 
 const AddWorkout = () => {
     const [workout, setWorkout] = useState({
@@ -10,6 +11,7 @@ const AddWorkout = () => {
 
     const [emptyFields, setEmptyFields] = useState([]);
     const {dispatch} = useWorkoutContext();
+    const {user} = useAuthContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -26,7 +28,8 @@ const AddWorkout = () => {
             const res = await fetch("/api/workouts", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${user.token}`
                 },
                 body: JSON.stringify(workout)
             });
@@ -35,11 +38,11 @@ const AddWorkout = () => {
             console.log(jsonData);
             
 
-            if(!res.ok) {
+            if(res.status === 400) {
                 setError(jsonData.error);
                 setEmptyFields([...jsonData.emptyFields]);
             }
-            else {
+            else if(res.ok) {
                 setError(null);
                 setWorkout({
                     title: "",
@@ -71,19 +74,19 @@ const AddWorkout = () => {
                 </div>
 
                 <div className='flex flex-col gap-2' >
-                    <label>Exercize title:</label>
+                    <label>Load (kg):</label>
                     <input onChange={handleChange} value={workout.load} className={`${emptyFields.includes("load") ? "border-red-600" : "border-gray-500"} border-[1px] border-solid border-gray-500 shadow-xl shadow-gray-100 rounded-[10px] p-1`} type="number" name="load" />
                 </div>
 
                 <div className='flex flex-col gap-2' >
-                    <label>Exercize title:</label>
+                    <label>Reps:</label>
                     <input onChange={handleChange} value={workout.reps} className={`${emptyFields.includes("reps") ? "border-red-600" : "border-gray-500"} border-[1px] border-solid border-gray-500 shadow-xl shadow-gray-100 rounded-[10px] p-1`} type="number" name="reps" />
                 </div>
 
                 <button disabled={loading} className='flex items-center justify-center bg-green-600 text-white p-1 rounded-[10px] hover:cursor-pointer hover:bg-green-500' type="submit">Add Workout</button>
                 {
                     error &&
-                    <div className='border-[1px] border-solid border-red-600 p-1 text-red-600'>{error}</div>
+                    <div className='border-[1px] border-solid border-red-600 p-1 text-red-600 max-w-[240px]'>{error}</div>
                 }
             </form>
         </div>

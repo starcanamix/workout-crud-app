@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import useWorkoutContext from "./useWorkoutContext.js"
+import useAuthContext from "./useAuthContext.js";
 
 const useFetchWorkouts = () => {
     const {dispatch} = useWorkoutContext();
+    const {user} = useAuthContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -10,8 +12,15 @@ const useFetchWorkouts = () => {
         const fetchWorkouts = async () => {
             setLoading(true);
 
+            console.log(user);
+            
+
             try {
-                const res = await fetch("/api/workouts");
+                const res = await fetch("/api/workouts", {
+                    headers: {
+                        "Authorization": `Bearer ${user.token}`
+                    }
+                });
                 const jsonData = await res.json();
             
                 if(!res.ok) {

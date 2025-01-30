@@ -2,14 +2,19 @@ import React from 'react';
 import { formatDistanceToNow } from "date-fns";
 import { FaTrashAlt } from "react-icons/fa";
 import useWorkoutContext from '../hooks/useWorkoutContext.js';
+import useAuthContext from '../hooks/useAuthContext.js';
 
 const WorkoutCard = ({workout}) => {
   const {dispatch} = useWorkoutContext();
+  const {user} = useAuthContext();
 
   const handleDelete = async () => {
     try {
       const res = await fetch(`/api/workouts/${workout._id}`, {
-        method: "DELETE"
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${user.token}`
+        }
       });
 
       const jsonData = await res.json();
